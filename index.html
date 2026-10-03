@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pregătiri Mate</title>
+<meta name="theme-color" content="#2350c8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pregătiri">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: caiet de matematică — un singur stâlp îngust; săptămâna pe zile, formularul dedesubt */
+:root{
+  --bg:#f5f7fa; --paper:#ffffff; --grid:rgba(40,80,160,.06);
+  --ink:#16213a; --muted:#5b6781; --line:#dde3ee;
+  --accent:#2350c8; --accent-ink:#ffffff; --accent-soft:#e6edfc;
+  --danger:#b3261e; --danger-soft:#fbe9e7; --ok:#1e7a4c; --ok-soft:#e3f4ea; --warn:#8a5a00; --warn-soft:#fdf1d8;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1420; --paper:#171e2d; --grid:rgba(120,160,255,.05);
+  --ink:#e6ebf5; --muted:#9aa6bf; --line:#2a3447;
+  --accent:#7d9dff; --accent-ink:#0d1325; --accent-soft:#1f2b4a;
+  --danger:#ff8a80; --danger-soft:#3a1d1c; --ok:#6fd3a0; --ok-soft:#15301f; --warn:#f2c46b; --warn-soft:#33280f; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+.wrap{max-width:640px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.75rem;line-height:1.1}
+h2{font-size:1.15rem}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sub{color:var(--muted);font-size:.9rem;margin-top:4px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 12px;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:default}
+.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.ghost{background:transparent;border-color:transparent;color:var(--accent);padding:6px 8px}
+.danger{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+.toplinks{display:flex;gap:2px}
+
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.weeknav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.weeknav .label{text-align:center;flex:1;min-width:0}
+.weeknav > button{min-width:44px;min-height:40px;font-size:1.2rem}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600}
+
+.days{display:flex;flex-direction:column;gap:14px}
+.day h3{margin:0 0 6px;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;display:flex;gap:8px;align-items:baseline}
+.day.today h3{color:var(--accent)}
+.day .empty{color:var(--muted);font-size:.85rem}
+.items{display:flex;flex-direction:column;gap:6px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.item.past{opacity:.55}
+.item.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.item .time{font-family:var(--f-mono);font-size:1rem;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.2}
+.item .time small{display:block;color:var(--muted);font-size:.72rem}
+.item .who{min-width:0}
+.item .name{font-weight:600;overflow-wrap:anywhere}
+.item .meta{color:var(--muted);font-size:.82rem;overflow-wrap:anywhere}
+.item .act{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1;align-items:center}
+.cls{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--ink);background:var(--paper)}
+
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.full{grid-column:1/-1}
+label{font-size:.8rem;font-weight:600;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:60px}
+.daypick{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.daypick button{padding:8px 0;font-size:.82rem;font-weight:600}
+.daypick button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:8px;align-items:center;font-weight:400;color:var(--ink);font-size:.9rem}
+.checks input{width:auto}
+.preview{grid-column:1/-1;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:.85rem;color:var(--muted)}
+.preview b{color:var(--ink)}
+.notif{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:6px;color:var(--ink)}
+.notif img{width:26px;height:26px;border-radius:7px;flex:none}
+.formfoot{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.msg{border-radius:12px;padding:10px 12px;font-size:.9rem}
+.msg.err{background:var(--danger-soft);color:var(--danger)}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.warn{background:var(--warn-soft);color:var(--warn)}
+.foot{color:var(--muted);font-size:.8rem;margin:0}
+
+.login{min-height:70vh;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.login img{width:72px;height:72px;border-radius:18px}
+.login p{margin:0;color:var(--muted);max-width:46ch}
+.login .primary{align-self:flex-start;padding:12px 18px}
+@media (max-width:440px){form{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.item{transition:border-color .15s}}
+</style>
+</head>
+<body>
+
+<!-- ecran de conectare -->
+<div class="wrap login" id="loginView" hidden>
+  <img src="apple-touch-icon.png" alt="">
+  <h1>Pregătiri Mate</h1>
+  <p id="loginText">Conectează-te cu contul Google în care ții pregătirile. Aplicația citește și scrie doar evenimentele din Google Calendar.</p>
+  <button class="primary" type="button" id="loginBtn">Conectează-te cu Google</button>
+  <div id="loginErr" class="msg err" hidden></div>
+</div>
+
+<!-- configurare (doar dacă lipsește Client ID) -->
+<div class="wrap login" id="setupView" hidden>
+  <h1>Configurare</h1>
+  <p>Lipește aici Client ID-ul din Google Cloud (se termină cu <span class="mono">.apps.googleusercontent.com</span>).</p>
+  <input id="cidInput" placeholder="123456-abc.apps.googleusercontent.com" autocomplete="off">
+  <button class="primary" type="button" id="cidSave">Salvează</button>
+</div>
+
+<!-- aplicația -->
+<div class="wrap" id="appView" hidden>
+  <header class="top">
+    <div>
+      <h1>Pregătiri Mate</h1>
+      <div class="sub">Sincronizat cu Google Calendar <span class="chip" id="roleChip" hidden>doar vizualizare</span></div>
+    </div>
+    <div class="toplinks">
+      <button class="ghost" id="refresh" type="button">↻ Reîncarcă</button>
+      <button class="ghost" id="logout" type="button">Ieșire</button>
+    </div>
+  </header>
+
+  <div id="banner" role="status" hidden></div>
+
+  <section class="panel" aria-labelledby="h-week">
+    <div class="weeknav">
+      <button type="button" id="prev" aria-label="Săptămâna anterioară">‹</button>
+      <div class="label"><h2 id="h-week">Săptămâna aceasta</h2><div class="sub mono" id="range"></div></div>
+      <button type="button" id="next" aria-label="Săptămâna următoare">›</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="days" id="days"><div class="sub">Se încarcă programul…</div></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-new" id="formPanel" hidden>
+    <h2 id="h-new">Elev nou</h2>
+    <form id="f" novalidate>
+      <div class="field full"><label for="name">Numele elevului</label><input id="name" autocomplete="off" placeholder="ex. Maria Popescu"></div>
+      <div class="field"><label for="cls">Clasa</label>
+        <select id="cls">
+          <option>a V-a</option><option>a VI-a</option><option>a VII-a</option><option selected>a VIII-a</option>
+          <option>a IX-a</option><option>a X-a</option><option>a XI-a</option><option>a XII-a</option><option value="?">încă nu știu</option>
+        </select></div>
+      <div class="field"><label for="dur">Durata</label>
+        <select id="dur"><option value="90" selected>90 min</option><option value="60">60 min</option><option value="120">120 min</option><option value="45">45 min</option></select></div>
+      <div class="field full"><label id="l-day">Ziua din săptămână</label><div class="daypick" id="daypick" role="group" aria-labelledby="l-day"></div></div>
+      <div class="field"><label for="time">Ora de început</label><input id="time" type="time" value="16:00" step="300"></div>
+      <div class="field" id="fromField"><label for="from">Începând cu</label><input id="from" type="date"></div>
+      <div class="field full"><label for="notes">Notițe (opțional)</label><textarea id="notes" placeholder="ex. pregătire pentru Evaluarea Națională, telefon părinte…"></textarea></div>
+      <div class="field full checks" id="checks">
+        <label><input type="checkbox" id="weekly" checked> Se repetă în fiecare săptămână</label>
+        <label><input type="checkbox" checked disabled> Notificare cu 1 oră înainte</label>
+        <label><input type="checkbox" id="dayBefore" checked> Notificare și cu o zi înainte</label>
+      </div>
+      <div class="preview" id="preview"></div>
+      <div class="formfoot">
+        <button class="primary" type="submit" id="save">Adaugă în calendar</button>
+        <button type="button" id="cancelEdit" hidden>Renunță</button>
+        <span class="sub" id="formstatus" role="status"></span>
+      </div>
+    </form>
+  </section>
+
+  <p class="foot" id="notifNote" hidden>Notificările vin din aplicația Google Calendar de pe telefon: cu o zi și cu o oră înainte de fiecare pregătire.</p>
+</div>
+
+<script>
+/* ====== CONFIGURARE ====== */
+const CLIENT_ID = "904356959398-759d0ur4hueclg0msa65h2a015md9h1l.apps.googleusercontent.com";
+const CALENDAR_ID = "7f94174a7f8604cb5e108321b5c95b925e1cf7df42a00f50b34bf6920ff93dab@group.calendar.google.com";
+/* ========================= */
+
+(() => {
+  const SCOPE = "https://www.googleapis.com/auth/calendar.events";
+  const API = () => "https://www.googleapis.com/calendar/v3/calendars/" + encodeURIComponent(CALENDAR_ID || "primary") + "/events";
+  const TAG = "#pregatire";
+  const DAYS = ["Luni","Marți","Miercuri","Joi","Vineri","Sâmbătă","Duminică"];
+  const DAYS_SHORT = ["Lu","Ma","Mi","Jo","Vi","Sâ","Du"];
+  const BYDAY = ["MO","TU","WE","TH","FR","SA","SU"];
+  const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Bucharest";
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } },
+    set(k,v){ try{ localStorage.setItem(k,v); }catch(_){} },
+    del(k){ try{ localStorage.removeItem(k); }catch(_){} }
+  };
+  const clientId = () => CLIENT_ID || store.get("pm_client_id") || "";
+  const redirectUri = () => location.origin + location.pathname;
+
+  let readOnly = false, weekOffset = 0, events = [], openKey = null, confirmKey = null, selectedDay = null, loading = false, editing = null;
+
+  /* ---------- autentificare (OAuth 2.0, redirect) ---------- */
+  function token(){
+    const t = store.get("pm_token"), exp = Number(store.get("pm_token_exp")||0);
+    return t && Date.now() < exp - 60000 ? t : null;
+  }
+  function signIn(silent){
+    const state = Math.random().toString(36).slice(2);
+    store.set("pm_state", state);
+    store.set("pm_last_auth", String(Date.now()));
+    const p = new URLSearchParams({
+      client_id: clientId(), redirect_uri: redirectUri(), response_type: "token",
+      scope: SCOPE, include_granted_scopes: "true", state
+    });
+    if(silent) p.set("prompt","none");
+    location.replace("https://accounts.google.com/o/oauth2/v2/auth?" + p);
+  }
+  function handleRedirect(){
+    if(!location.hash || location.hash.length < 2) return null;
+    const h = new URLSearchParams(location.hash.slice(1));
+    if(!h.has("access_token") && !h.has("error")) return null;
+    history.replaceState(null, "", location.pathname + location.search);
+    if(h.get("state") !== store.get("pm_state")) return {error:"state"};
+    if(h.get("error")) return {error:h.get("error")};
+    store.set("pm_token", h.get("access_token"));
+    store.set("pm_token_exp", String(Date.now() + Number(h.get("expires_in")||3600)*1000));
+    store.set("pm_signed_in","1");
+    return {ok:true};
+  }
+  function reauth(){
+    const last = Number(store.get("pm_last_auth")||0);
+    if(store.get("pm_signed_in") && Date.now()-last > 20000){ signIn(true); return true; }
+    showLogin(); return false;
+  }
+
+  async function api(method, path, body, query){
+    const t = token();
+    if(!t){ reauth(); throw {code:"auth"}; }
+    const url = API() + (path||"") + (query ? "?" + new URLSearchParams(query) : "");
+    const res = await fetch(url, {
+      method, headers: {Authorization:"Bearer "+t, ...(body?{"Content-Type":"application/json"}:{})},
+      body: body ? JSON.stringify(body) : undefined
+    }).catch(() => { throw {code:"network"}; });
+    if(res.status === 401){ store.del("pm_token"); reauth(); throw {code:"auth"}; }
+    if(res.status === 204) return null;
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw {code: res.status === 403 ? "forbidden" : res.status === 404 || res.status === 410 ? "gone" : "http", message: data.error && data.error.message};
+    return data;
+  }
+  function explain(err){
+    switch(err && err.code){
+      case "network": return "Nu ai conexiune la internet. Verifică Wi-Fi-ul sau datele mobile și apasă Reîncarcă.";
+      case "auth": return "Sesiunea Google a expirat. Te reconectez…";
+      case "forbidden": return "Google a refuzat accesul la calendar. Ieși din aplicație și conectează-te din nou, bifând accesul la Google Calendar.";
+      case "gone": return "Pregătirea nu mai există în calendar. Probabil a fost ștearsă din altă parte.";
+      default: return "Google Calendar a răspuns cu o eroare" + (err && err.message ? ": " + err.message : "") + ". Încearcă din nou.";
+    }
+  }
+  function banner(kind, text){ const b=$("banner"); if(!text){b.hidden=true;return;} b.className="msg "+kind; b.textContent=text; b.hidden=false; }
+
+  /* ---------- date ---------- */
+  const pad = n => String(n).padStart(2,"0");
+  const dow = d => (d.getDay()+6)%7;
+  function mondayOf(d){ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-dow(x)); return x; }
+  function isoLocal(d){
+    const off=-d.getTimezoneOffset(), s=off>=0?"+":"-", a=Math.abs(off);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00${s}${pad(Math.floor(a/60))}:${pad(a%60)}`;
+  }
+  const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const dateKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const fmtDay = d => d.toLocaleDateString("ro-RO",{day:"numeric",month:"long"});
+  const fmtShort = d => d.toLocaleDateString("ro-RO",{day:"numeric",month:"short"});
+  const pick = v => !v ? null : v.dateTime ? new Date(v.dateTime) : v.date ? new Date(v.date+"T00:00:00") : null;
+
+  function parseEvent(ev){
+    const start = pick(ev.start), end = pick(ev.end);
+    if(!start || isNaN(start)) return null;
+    const desc = String(ev.description||"").replace(/<br\s*\/?>/gi,"\n").replace(/<[^>]+>/g,"");
+    const line = k => { const m = desc.match(new RegExp("^\\s*"+k+"\\s*:\\s*(.+)$","mi")); return m?m[1].trim():""; };
+    let name = line("Elev"), cls = line("Clasa");
+    if(!name){ const parts=String(ev.summary||"").split("·").map(s=>s.trim()); name = parts[1]||ev.summary||"Pregătire"; if(!cls && parts[2]) cls = parts[2].replace(/^cls\.?\s*/i,""); }
+    return {
+      id: ev.id, seriesId: ev.recurringEventId || ev.id, recurring: !!ev.recurringEventId,
+      start, end: end && !isNaN(end) ? end : new Date(start.getTime()+3600000),
+      name, cls, notes: line("Notițe")
+    };
+  }
+  function title(name, cls){ return `Mate · ${name} · cls. ${cls}`; }
+  function description(name, cls, start, notes){
+    return `${TAG}\nElev: ${name}\nClasa: ${cls}\nOra: ${hhmm(start)}` + (notes ? `\nNotițe: ${notes}` : "");
+  }
+
+  /* ---------- săptămâna ---------- */
+  function weekBounds(){ const m=mondayOf(new Date()); m.setDate(m.getDate()+7*weekOffset); const e=new Date(m); e.setDate(e.getDate()+7); return [m,e]; }
+
+  async function load(){
+    const [from,to] = weekBounds();
+    $("h-week").textContent = weekOffset===0?"Săptămâna aceasta":weekOffset===1?"Săptămâna viitoare":weekOffset===-1?"Săptămâna trecută":"Săptămâna";
+    const last = new Date(to); last.setDate(last.getDate()-1);
+    $("range").textContent = `${fmtShort(from)} – ${fmtShort(last)}`;
+    loading = true; $("refresh").disabled = true;
+    try{
+      const data = await api("GET","",null,{
+        timeMin: isoLocal(from), timeMax: isoLocal(to), singleEvents: "true", orderBy: "startTime",
+        q: "pregatire", maxResults: "250", timeZone: TZ
+      });
+      readOnly = !["owner","writer"].includes(data.accessRole || "owner");
+      applyRole();
+      events = (data.items||[])
+        .filter(ev => ev.status !== "cancelled" && (String(ev.description||"").includes(TAG) || /^Mate ·/.test(ev.summary||"")))
+        .map(parseEvent).filter(Boolean).sort((a,b)=>a.start-b.start);
+      store.set("pm_cache_"+dateKey(from), JSON.stringify(events.map(e=>({...e,start:e.start.toISOString(),end:e.end.toISOString()}))));
+      if(!$("banner").classList.contains("ok") && !$("banner").classList.contains("warn")) banner();
+    }catch(err){
+      if(err.code === "auth") return;
+      banner("err", err.code === "gone" || err.code === "forbidden" ? "Nu ai acces la calendarul cu pregătiri. Cere-i proprietarului să îl partajeze cu contul tău Google (opțiunea „Vezi toate detaliile evenimentelor”), apoi apasă Reîncarcă." : explain(err));
+      const cached = store.get("pm_cache_"+dateKey(from));
+      if(cached){ try{ events = JSON.parse(cached).map(e=>({...e,start:new Date(e.start),end:new Date(e.end)})); }catch(_){} }
+    }finally{ loading = false; $("refresh").disabled = false; render(); }
+  }
+
+  function applyRole(){
+    $("formPanel").hidden = readOnly;
+    $("roleChip").hidden = !readOnly;
+    $("notifNote").hidden = readOnly;
+  }
+  function render(){
+    const [from] = weekBounds(), now = new Date(), todayK = dateKey(now);
+    const box = $("days"); box.textContent = "";
+    const minutes = events.reduce((s,e)=>s+(e.end-e.start)/60000,0);
+    const students = new Set(events.map(e=>e.name.toLowerCase())).size;
+    $("stats").textContent = "";
+    for(const t of [`${events.length} ${events.length===1?"pregătire":"pregătiri"}`, `${students} ${students===1?"elev":"elevi"}`, `${(minutes/60).toLocaleString("ro-RO",{maximumFractionDigits:1})} ore`]){
+      const s=document.createElement("span"); s.className="chip"; s.textContent=t; $("stats").appendChild(s);
+    }
+    for(let i=0;i<7;i++){
+      const d = new Date(from); d.setDate(d.getDate()+i);
+      const list = events.filter(e=>dateKey(e.start)===dateKey(d));
+      if(!list.length && i===6) continue;
+      const sec = document.createElement("div"); sec.className = "day"+(dateKey(d)===todayK?" today":"");
+      const h = document.createElement("h3");
+      const a = document.createElement("span"); a.textContent = DAYS[i]+(dateKey(d)===todayK?" · azi":"");
+      const b = document.createElement("span"); b.className="mono"; b.textContent = fmtDay(d);
+      h.append(a,b); sec.appendChild(h);
+      if(!list.length){ const p=document.createElement("div"); p.className="empty"; p.textContent="Liber"; sec.appendChild(p); }
+      const items = document.createElement("div"); items.className = "items";
+      for(const e of list){
+        const key = e.id;
+        const it = document.createElement("div");
+        it.className = "item" + (e.end<now ? " past" : (e.start<=now && e.end>now ? " now" : ""));
+        const t = document.createElement("div"); t.className="time";
+        const t1=document.createElement("span"); t1.textContent=hhmm(e.start);
+        const t2=document.createElement("small"); t2.textContent=hhmm(e.end); t.append(t1,t2);
+        const w = document.createElement("div"); w.className="who";
+        const n = document.createElement("div"); n.className="name"; n.textContent=e.name;
+        const m = document.createElement("div"); m.className="meta";
+        if(e.cls){ const c=document.createElement("span"); c.className="cls"; c.textContent=e.cls==="?"?"clasa ?":"cls. "+e.cls; m.append(c," "); }
+        m.append(e.recurring ? "săptămânal" : "o singură dată");
+        w.append(n,m);
+        if(e.notes){ const nn=document.createElement("div"); nn.className="meta"; nn.textContent=e.notes; w.appendChild(nn); }
+        if(readOnly){ it.append(t,w); items.appendChild(it); continue; }
+        const more = btn(openKey===key?"Închide":"Opțiuni","ghost",()=>{ openKey=openKey===key?null:key; confirmKey=null; render(); });
+        more.setAttribute("aria-expanded", String(openKey===key));
+        it.append(t,w,more);
+        if(openKey===key){
+          const act = document.createElement("div"); act.className="act";
+          if(confirmKey===key){
+            const q=document.createElement("span"); q.className="meta"; q.textContent=`Oprești toate pregătirile cu ${e.name}?`;
+            act.append(q, btn("Da, șterge-le","danger",()=>remove(e,"all")), btn("Renunță","",()=>{confirmKey=null;render();}));
+          } else {
+            act.append(btn("Editează","",()=>startEdit(e)));
+            if(e.recurring) act.append(btn(`Anulează doar ${fmtShort(e.start)}`,"",()=>remove(e,"one")));
+            act.append(btn(e.recurring?"Oprește pregătirile":"Șterge","danger",()=>{ if(e.recurring){confirmKey=key;render();} else remove(e,"all"); }));
+          }
+          it.appendChild(act);
+        }
+        items.appendChild(it);
+      }
+      sec.appendChild(items); box.appendChild(sec);
+    }
+  }
+  function btn(text, cls, fn){ const b=document.createElement("button"); b.type="button"; if(cls) b.className=cls; b.textContent=text; b.onclick=fn; return b; }
+
+  async function remove(e, scope){
+    try{
+      await api("DELETE", "/"+encodeURIComponent(scope==="one"?e.id:e.seriesId), null, {sendUpdates:"none"});
+      banner("ok", scope==="one" ? `Am anulat pregătirea cu ${e.name} din ${fmtDay(e.start)}.` : `Am șters pregătirile cu ${e.name} din calendar.`);
+      openKey=null; confirmKey=null; await load();
+    }catch(err){ if(err.code!=="auth") banner("err", explain(err)); }
+  }
+
+  /* ---------- formular ---------- */
+  const dp = $("daypick");
+  DAYS_SHORT.forEach((s,i)=>{ const b=btn(s,"",()=>{ setDay(i); syncFrom(); updatePreview(); }); b.title=DAYS[i]; b.setAttribute("aria-pressed","false"); dp.appendChild(b); });
+  function setDay(i){ selectedDay=i; [...dp.children].forEach((c,j)=>c.setAttribute("aria-pressed", String(j===i))); }
+
+  function nextDateFor(day, timeStr){
+    const [h,m] = timeStr.split(":").map(Number), now = new Date();
+    const c = new Date(now); c.setDate(now.getDate()+((day-dow(now)+7)%7)); c.setHours(h,m,0,0);
+    if(c <= now) c.setDate(c.getDate()+7);
+    return c;
+  }
+  function syncFrom(){ if(selectedDay!=null && !editing) $("from").value = dateKey(nextDateFor(selectedDay, $("time").value||"16:00")); }
+  function fromDate(){
+    const t=$("time").value; if(!t) return null;
+    const [h,mi]=t.split(":").map(Number);
+    if(editing){ if(selectedDay==null) return null; const d=mondayOf(editing.start); d.setDate(d.getDate()+selectedDay); d.setHours(h,mi,0,0); return d; }
+    const v=$("from").value; if(!v) return null;
+    const [y,mo,da]=v.split("-").map(Number); return new Date(y,mo-1,da,h,mi,0,0);
+  }
+  function updatePreview(){
+    const name=$("name").value.trim()||"Numele elevului", cls=$("cls").value, start=fromDate(), weekly=editing?editing.recurring:$("weekly").checked;
+    const p=$("preview"); p.textContent="";
+    if(!start){ p.textContent="Alege ziua și ora ca să vezi cum va arăta notificarea."; return; }
+    const s=document.createElement("div"); const bb=document.createElement("b");
+    bb.textContent=(weekly?`În fiecare ${DAYS[dow(start)].toLowerCase()}`+(editing?"":`, de la ${fmtDay(start)}`):`${DAYS[dow(start)]}, ${fmtDay(start)}`)+`, ora ${hhmm(start)}`;
+    s.appendChild(bb);
+    const n=document.createElement("div"); n.className="notif";
+    const img=document.createElement("img"); img.src="apple-touch-icon.png"; img.alt="";
+    const tx=document.createElement("div"); const tb=document.createElement("b"); tb.textContent=title(name,cls);
+    const tm=document.createElement("div"); tm.className="mono"; tm.textContent=`${hhmm(start)} – ${hhmm(new Date(start.getTime()+$("dur").value*60000))} · peste 1 oră`;
+    tx.append(tb,tm); n.append(img,tx); p.append(s,n);
+  }
+  ["name","cls","dur","weekly"].forEach(id=>$(id).addEventListener("input",updatePreview));
+  $("time").addEventListener("input",()=>{ syncFrom(); updatePreview(); });
+  $("from").addEventListener("change",()=>{ const d=fromDate(); if(d) setDay(dow(d)); updatePreview(); });
+
+  function startEdit(e){
+    editing = e; openKey = null;
+    $("h-new").textContent = `Editează: ${e.name}`;
+    $("name").value = e.name;
+    const opt = [...$("cls").options].find(o=>o.value===e.cls); $("cls").value = opt ? e.cls : "?";
+    $("time").value = hhmm(e.start);
+    const dur = String(Math.round((e.end-e.start)/60000));
+    if(![...$("dur").options].some(o=>o.value===dur)){ const o=document.createElement("option"); o.value=dur; o.textContent=dur+" min"; $("dur").appendChild(o); }
+    $("dur").value = dur;
+    $("notes").value = e.notes || "";
+    setDay(dow(e.start));
+    $("fromField").hidden = true; $("checks").hidden = true;
+    $("save").textContent = e.recurring ? "Salvează pentru toate săptămânile" : "Salvează modificările";
+    $("cancelEdit").hidden = false;
+    updatePreview(); render();
+    $("formPanel").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+  function endEdit(){
+    editing = null;
+    $("h-new").textContent = "Elev nou";
+    $("name").value = ""; $("notes").value = "";
+    $("fromField").hidden = false; $("checks").hidden = false;
+    $("save").textContent = "Adaugă în calendar"; $("cancelEdit").hidden = true;
+    syncFrom(); updatePreview();
+  }
+  $("cancelEdit").onclick = endEdit;
+
+  $("f").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const st=$("formstatus"), name=$("name").value.trim(), cls=$("cls").value;
+    if(!name){ st.textContent="Scrie numele elevului."; $("name").focus(); return; }
+    if(selectedDay==null){ st.textContent="Alege ziua din săptămână."; return; }
+    const start = fromDate(); if(!start){ st.textContent="Alege ziua și ora."; return; }
+    const dur = Number($("dur").value), end = new Date(start.getTime()+dur*60000), notes = $("notes").value.trim();
+    $("save").disabled = true; st.textContent = "Se salvează în Google Calendar…";
+    try{
+      if(editing){
+        const e = editing;
+        const body = { summary: title(name,cls), description: description(name,cls,start,notes) };
+        if(e.recurring){
+          const master = await api("GET","/"+encodeURIComponent(e.seriesId));
+          const ms = pick(master.start);
+          const s0 = mondayOf(ms); s0.setDate(s0.getDate()+selectedDay); s0.setHours(start.getHours(), start.getMinutes(), 0, 0);
+          if(s0 < ms && dow(s0) < dow(ms)) s0.setDate(s0.getDate()+7);
+          body.start = {dateTime: isoLocal(s0), timeZone: TZ};
+          body.end = {dateTime: isoLocal(new Date(s0.getTime()+dur*60000)), timeZone: TZ};
+          body.recurrence = (master.recurrence||["RRULE:FREQ=WEEKLY"]).map(r => r.startsWith("RRULE:") ? r.replace(/BYDAY=[A-Z,]+/, "BYDAY="+BYDAY[selectedDay]) : r);
+          if(!body.recurrence.some(r=>/BYDAY=/.test(r))) body.recurrence = body.recurrence.map(r => r.startsWith("RRULE:") ? r+";BYDAY="+BYDAY[selectedDay] : r);
+        } else {
+          body.start = {dateTime: isoLocal(start), timeZone: TZ};
+          body.end = {dateTime: isoLocal(end), timeZone: TZ};
+        }
+        await api("PATCH","/"+encodeURIComponent(e.seriesId), body, {sendUpdates:"none"});
+        banner("ok", `Am salvat modificările pentru ${name}: ${DAYS[selectedDay].toLowerCase()}, ora ${hhmm(start)}.`);
+        endEdit();
+      } else {
+        const weekly = $("weekly").checked;
+        const clash = events.find(x => dow(x.start)===dow(start) && hhmm(x.start)<hhmm(end) && hhmm(x.end)>hhmm(start) && (weekly || dateKey(x.start)===dateKey(start)));
+        const overrides = [{method:"popup",minutes:60}]; if($("dayBefore").checked) overrides.push({method:"popup",minutes:1440});
+        const body = {
+          summary: title(name,cls), description: description(name,cls,start,notes), colorId: "9",
+          start: {dateTime: isoLocal(start), timeZone: TZ}, end: {dateTime: isoLocal(end), timeZone: TZ},
+          reminders: {useDefault:false, overrides}
+        };
+        if(weekly) body.recurrence = [`RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[dow(start)]}`];
+        await api("POST","",body);
+        banner(clash?"warn":"ok", `Am adăugat ${name}, ${weekly?"în fiecare "+DAYS[dow(start)].toLowerCase():fmtDay(start)} la ${hhmm(start)}.`+(clash?` Atenție: se suprapune cu ${clash.name}.`:""));
+        $("name").value=""; $("notes").value="";
+        weekOffset = Math.round((mondayOf(start)-mondayOf(new Date()))/(7*864e5));
+        updatePreview();
+      }
+      st.textContent = "";
+      await load();
+    }catch(err){
+      st.textContent = "";
+      if(err.code!=="auth") banner("err", explain(err) + (err.code==="network" ? "" : " Verifică în calendar înainte să încerci din nou."));
+    }finally{ $("save").disabled = false; }
+  });
+
+  /* ---------- navigare ---------- */
+  $("prev").onclick = () => { weekOffset--; openKey=null; load(); };
+  $("next").onclick = () => { weekOffset++; openKey=null; load(); };
+  $("refresh").onclick = () => { banner(); load(); };
+  $("logout").onclick = () => {
+    const t = store.get("pm_token");
+    if(t) fetch("https://oauth2.googleapis.com/revoke?token="+encodeURIComponent(t),{method:"POST"}).catch(()=>{});
+    ["pm_token","pm_token_exp","pm_signed_in"].forEach(store.del);
+    showLogin();
+  };
+  document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState !== "visible" || $("appView").hidden || loading) return;
+    if(!token()) reauth(); else load();
+  });
+
+  /* ---------- pornire ---------- */
+  function showLogin(msg){
+    $("appView").hidden = true; $("setupView").hidden = true; $("loginView").hidden = false;
+    const e=$("loginErr"); e.hidden=!msg; if(msg) e.textContent=msg;
+  }
+  function showApp(){
+    $("loginView").hidden = true; $("setupView").hidden = true; $("appView").hidden = false;
+    updatePreview(); load();
+  }
+  $("loginBtn").onclick = () => signIn(false);
+  $("cidSave").onclick = () => { const v=$("cidInput").value.trim(); if(/\.apps\.googleusercontent\.com$/.test(v)){ store.set("pm_client_id",v); boot(); } else $("cidInput").focus(); };
+
+  function boot(){
+    if(!clientId()){ $("setupView").hidden=false; $("loginView").hidden=true; $("appView").hidden=true; return; }
+    const r = handleRedirect();
+    if(r && r.error){
+      if(r.error === "access_denied") return showLogin("Nu ai permis accesul la Google Calendar. Apasă butonul de mai jos și bifează accesul la calendar.");
+      if(r.error === "state") return showLogin("Conectarea nu a putut fi verificată. Încearcă din nou.");
+      return showLogin();   // interaction_required etc. → conectare manuală
+    }
+    if(token()) return showApp();
+    if(!reauth()) return;
+  }
+  boot();
+
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script>
+</body>
+</html>
